@@ -28,6 +28,11 @@ export class PhaserPage {
     }
   }
 
+  ionViewWillEnter() {
+    console.log("Runs when the page is about to enter and become the active page.");
+    console.log("Find all lifecycle events here (about half way down page): http://ionicframework.com/docs/v2/api/components/nav/NavController/")
+  }
+
   game: Phaser.Game;
   textValue: any;
   updateCount: number;
