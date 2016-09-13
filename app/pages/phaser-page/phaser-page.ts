@@ -44,7 +44,7 @@ export class PhaserPage {
   D: any;
 
   preload() {
-      //this.game.load.image("avatar", "img/avatar.png");
+      this.game.load.image("avatar", "img/avatar.png");
   }
 
   create() {
@@ -57,7 +57,6 @@ export class PhaserPage {
       console.log("game width: " + this.game.width)
       console.log("image width: " + image.width)
 
-/*
       this.avatarSprite = this.game.add.sprite(
             this.game.width / 2 / window.devicePixelRatio - image.width / 2,
             this.game.height / 2 / window.devicePixelRatio- image.height / 2,
@@ -66,11 +65,11 @@ export class PhaserPage {
       // create the cursor key object
       this.cursors = this.game.input.keyboard.createCursorKeys();
 
-        this.A = this.game.input.keyboard.addKey(Phaser.Keyboard.A);
-        this.D = this.game.input.keyboard.addKey(Phaser.Keyboard.D);
-        this.A.onDown.add(PhaserPage.prototype.moveLeft, this);
-        this.D.onDown.add(PhaserPage.prototype.moveRight, this);
-*/
+      this.A = this.game.input.keyboard.addKey(Phaser.Keyboard.A);
+      this.D = this.game.input.keyboard.addKey(Phaser.Keyboard.D);
+      this.A.onDown.add(PhaserPage.prototype.moveLeft, this);
+      this.D.onDown.add(PhaserPage.prototype.moveRight, this);
+
   }
 
   update() {
@@ -95,14 +94,12 @@ export class PhaserPage {
       */
   }
 
-/*
   moveLeft() {
       this.avatarSprite.position.add(-1, 0);
   }
   moveRight() {
       this.avatarSprite.position.add(1, 0);
   }
-  */
 
   render() {
       this.game.debug.text("This is drawn in render(): " + (this.renderCount++).toString(), 0, 80);
