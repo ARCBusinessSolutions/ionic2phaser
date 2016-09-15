@@ -16,7 +16,7 @@ export class PhaserPage {
     public nav: NavController) {
 
     if ( !this.game ){
-      console.log("Create phaser game object... " + this.count)
+      console.log("Create phaser game object...  " + this.count)
       console.log("device pixel ratio... " + window.devicePixelRatio)
       //canvasElement = angular.element(document.querySelector('#tempCanvas'));
       this.game = new Phaser.Game(
@@ -37,14 +37,12 @@ export class PhaserPage {
   textValue: any;
   updateCount: number;
   renderCount: number;
-  cursors: any;
-  avatarSprite: any;
-
-  A: any;
-  D: any;
-
+  Test: any;
   preload() {
       this.game.load.image("avatar", "img/avatar.png");
+      this.game.load.image("Bt1", "img/bt1.png");
+      this.game.load.image("Bt2", "img/bt2.png");
+      this.game.load.atlas('spritesheet', 'img/cake.png', 'img/cake.json');
   }
 
   create() {
@@ -53,61 +51,94 @@ export class PhaserPage {
       this.updateCount = 0;
       this.renderCount = 0;
 
-      var image = this.game.cache.getImage("avatar");
-      console.log("game width: " + this.game.width)
-      console.log("image width: " + image.width)
-
-      this.avatarSprite = this.game.add.sprite(
-            this.game.width / 2 / window.devicePixelRatio - image.width / 2,
-            this.game.height / 2 / window.devicePixelRatio- image.height / 2,
-             "avatar");
-
-      // create the cursor key object
-      this.cursors = this.game.input.keyboard.createCursorKeys();
-
-      this.A = this.game.input.keyboard.addKey(Phaser.Keyboard.A);
-      this.D = this.game.input.keyboard.addKey(Phaser.Keyboard.D);
-      this.A.onDown.add(PhaserPage.prototype.moveLeft, this);
-      this.D.onDown.add(PhaserPage.prototype.moveRight, this);
+    this.Test = new testsprite(this.game);
+     
 
   }
 
   update() {
       this.textValue.text = (this.updateCount++).toString();
+      if(this.Test){this.Test.update();}
 
-/*
-      // Update input state
-      this.game.input.update();
-
-      if (this.cursors.left.isDown) {
-          if (this.cursors.left.ctrlKey)
-              this.avatarSprite.position.x -= 5;
-          else
-              this.avatarSprite.position.x--;
-      }
-      if (this.cursors.right.isDown) {
-          if (this.cursors.right.ctrlKey)
-              this.avatarSprite.position.x += 5;
-          else
-              this.avatarSprite.position.x++;
-      }
-      */
   }
 
-  moveLeft() {
-      this.avatarSprite.position.add(-1, 0);
-  }
-  moveRight() {
-      this.avatarSprite.position.add(1, 0);
-  }
+  
 
   render() {
       this.game.debug.text("This is drawn in render(): " + (this.renderCount++).toString(), 0, 80);
   }
-  /*
-  goMarketing() {
-    this.nav.push(GameMarketing);
-  }
-  */
+  
 
 }
+
+
+
+
+
+
+class testsprite {
+  game:Phaser.Game;
+  SP:Phaser.Sprite;
+  Stopping:boolean;
+  ToggleAnmation:Function;
+  BT1:Phaser.Button;
+  BT2:Phaser.Button;
+  text:Phaser.Text;
+  constructor(game:Phaser.Game){
+    this.game = game;
+    //add a sprite
+    this.SP = this.game.add.sprite(this.game.world.bounds.width,this.game.world.centerY,'spritesheet');
+    this.SP.anchor.set(0.5,0.5);
+    //add animation
+    this.SP.animations.add('anim');
+    this.SP.animations.play('anim',3,true);
+     
+// sprite can move by default
+this.Stopping = false;
+//add controls buttons
+this.BT1 = this.game.add.button(300,200,'Bt1',this.Toggleanimation,this);
+this.BT2 = this.game.add.button(500,200,'Bt2',this.ToggleMovment,this);
+
+//adding text
+  var style = { font: "bold 24px Arial", fill: "#fff", boundsAlignH: "center", boundsAlignV: "middle" };
+  this.text = this.game.add.text(400, 100, "Test Sprite", style);
+
+  }
+
+  ToggleMovment(){
+  this.Stopping = !this.Stopping;
+  }
+  
+  Toggleanimation(){
+  //console.log(this.SP.animations.currentFrame.name);
+    if (!this.SP.animations.paused){
+    this.SP.animations.paused = true;
+    }else{
+    this.SP.animations.paused = false;
+    }
+  }
+
+
+ //translate the sprite from right to left
+    Move(){
+      this.SP.x -= 5;
+    if(this.SP.x < -this.SP.width/2){
+      this.SP.x = this.game.world.bounds.width ;
+    }
+  }
+
+  update(){
+    if(!this.Stopping){this.Move();}
+  }
+
+
+//end of the testsprite class
+}
+
+
+
+
+
+//Notes
+
+// create a group to hold the test class
