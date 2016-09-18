@@ -1,0 +1,84 @@
+{"frames": {
+
+"b1.png":
+{
+	"frame": {"x":1,"y":1,"w":146,"h":93},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":146,"h":93},
+	"sourceSize": {"w":146,"h":93},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"b2.png":
+{
+	"frame": {"x":149,"y":1,"w":156,"h":77},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":156,"h":77},
+	"sourceSize": {"w":156,"h":77},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"b3.png":
+{
+	"frame": {"x":307,"y":1,"w":150,"h":69},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":150,"h":69},
+	"sourceSize": {"w":150,"h":69},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"b4.png":
+{
+	"frame": {"x":459,"y":1,"w":145,"h":78},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":145,"h":78},
+	"sourceSize": {"w":145,"h":78},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"b5.png":
+{
+	"frame": {"x":606,"y":1,"w":144,"h":92},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":144,"h":92},
+	"sourceSize": {"w":144,"h":92},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"b6.png":
+{
+	"frame": {"x":752,"y":1,"w":149,"h":110},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":149,"h":110},
+	"sourceSize": {"w":149,"h":110},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"b7.png":
+{
+	"frame": {"x":903,"y":1,"w":146,"h":115},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":146,"h":115},
+	"sourceSize": {"w":146,"h":115},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"b8.png":
+{
+	"frame": {"x":1051,"y":1,"w":146,"h":107},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":146,"h":107},
+	"sourceSize": {"w":146,"h":107},
+	"pivot": {"x":0.5,"y":0.5}
+}},
+"meta": {
+	"app": "http://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "bird.png",
+	"format": "RGBA8888",
+	"size": {"w":1198,"h":117},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:fa2e01f89855af703b642bb2184d2f85:38bc929908cb8dc0f51ba91771652c74:6a1677158d465170d66e062b762d8e2a$"
+}
+}
