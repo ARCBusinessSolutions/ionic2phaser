@@ -33,6 +33,7 @@
     "cordova-plugin-console",
     "cordova-plugin-statusbar",
     "cordova-plugin-device",
+    "cordova-plugin-media",
     "cordova-plugin-splashscreen",
     "ionic-plugin-keyboard"
   ],
