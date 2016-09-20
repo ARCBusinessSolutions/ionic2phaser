@@ -1,7 +1,7 @@
 // Library Imports
 import {Component, ViewChild} from '@angular/core';
 import {NavController, Alert} from 'ionic-angular';
-
+import { MediaPlugin } from 'ionic-native';
 
 
 declare var Phaser: any;
@@ -16,59 +16,63 @@ export class PhaserPage {
 
   constructor(
     public nav: NavController) {
+//constructor
+  }
 
-    
+  ionViewDidEnter() {
+    console.log("ionViewDidEnter this.game : ",this.game);
+    console.log("Create phaser game object...  " + this.count)
+    console.log("device pixel ratio... " + window.devicePixelRatio)
 
-    if ( !this.game ){
-    
-      console.log("Create phaser game object...  " + this.count)
-      console.log("device pixel ratio... " + window.devicePixelRatio)
-  
-      //canvasElement = angular.element(document.querySelector('#tempCanvas'));
+    // create the game
+      if ( !this.game ){
+
       this.game = new Phaser.Game(
         window.innerWidth * window.devicePixelRatio, window.innerHeight * window.devicePixelRatio, 
         Phaser.AUTO, 
         'phaserDiv', 
         { create: this.create, update: this.update, preload: this.preload }
         );
+
       this.count++;
-      
-    
-
-    
-
-
-
+      this.PlayBackgroundMusic();
+      document.addEventListener('pause', ()=>this.Paused(), false);
 
 
 
     }
+  }ionViewDidLeave() {
+  //detroy all game data
+   this.game.state.clearCurrentState();
+   this.game.disableStep();
+   this.game.destroy();
+   this.game = null;
+   this.my_media.stop();
+  }PlayBackgroundMusic(){
+// get good location
+console.log("start music",this.my_media);
+let path = window.location.pathname;
+path = path.substr(0, path.length - 10 );
+// get the file
+this.my_media = new MediaPlugin(path+'audios/mario.mp3');
+this.my_media.play();
+  }Paused(){
+    //fire this function when app is inactive
+    this.my_media.stop();
   }
-
-  ionViewWillEnter() {
-    console.log("Runs when the page is about to enter and become the active page.");
-    console.log("Find all lifecycle events here (about half way down page): http://ionicframework.com/docs/v2/api/components/nav/NavController/")
-  }
- 
   game: Phaser.Game;
- 
-  
-
   Path:string="Iphone";
   Test: any;
   BG:Phaser.Sprite;
-
   MenuState:any;
   TSS:any;
   POS:any;
   TSLS:any;
-
+  my_media:MediaPlugin;
   preload() {
     //check Iphone or Ipad
     if(window.innerHeight/window.innerWidth>1.6){this.Path="Iphone";}
     else {this.Path="Ipad";}
-
-
     //menu Assets
       this.game.load.image("B01", 'img/'+this.Path+'/B01.png');
       this.game.load.image("B02", 'img/'+this.Path+'/B02.png');
@@ -76,24 +80,19 @@ export class PhaserPage {
       this.game.load.image("B04", 'img/'+this.Path+'/B04.png');//play sound fx
       this.game.load.image('BG', 'img/'+this.Path+'/Background.png');
       this.game.load.image("backBt", 'img/'+this.Path+'/back.png');
-
-
       //test PoUp Assets
       this.game.load.image("Cancel", 'img/'+this.Path+'/cancel.png');
       this.game.load.image("Pop", 'img/'+this.Path+'/pop.png');
       this.game.load.image("Yes", 'img/'+this.Path+'/yes.png');
       this.game.load.image("No", 'img/'+this.Path+'/no.png');
       this.game.load.image("Bt4", 'img/'+this.Path+'/bt4.png');
-
-
       //test sprite Assets
       this.game.load.image("Bt1", 'img/'+this.Path+'/bt1.png');
       this.game.load.image("Room", 'img/'+this.Path+'/Room1.png');
       this.game.load.image("Bt2", 'img/'+this.Path+'/bt2.png');
       this.game.load.image("Bt3", 'img/'+this.Path+'/bt3.png');//play sound fx
       this.game.load.atlas('spritesheet', 'img/'+this.Path+'/cake.png', 'img/'+this.Path+'/cake.json');
-     
-    //test sprite Layering Assets
+      //test sprite Layering Assets
        this.game.load.image("Mountain", 'img/'+this.Path+'/Mountain.png');
        this.game.load.image("Sky", 'img/'+this.Path+'/Sky.png');
        this.game.load.atlas('bird', 'img/'+this.Path+'/bird.png', 'img/'+this.Path+'/bird.json');
@@ -102,8 +101,8 @@ export class PhaserPage {
   create() {
     //reseize world
     this.game.world.setBounds(0,0,window.innerWidth,window.innerHeight);
-     console.log("------- window.devicePixelRatio ------->",window.devicePixelRatio);
-     console.log("new game.world ",this.game.world.bounds);
+    // console.log("------- window.devicePixelRatio ------->",window.devicePixelRatio);
+    // console.log("new game.world ",this.game.world.bounds);
 
      // add games states
       let M = new Menu(this.game);
