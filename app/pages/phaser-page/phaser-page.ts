@@ -4,15 +4,26 @@ import {NavController, Alert} from 'ionic-angular';
 import { MediaPlugin } from 'ionic-native';
 
 
+var GameReference:any;//detroy when you quit the page
+
+//create only one instance
+var soundFx:MediaPlugin;
+var my_media:MediaPlugin;
+//flag to check if background music is active
+var runningMedia:boolean=false;
 declare var Phaser: any;
 
 @Component({
   templateUrl: 'build/pages/phaser-page/phaser-page.html'
 })
 
-export class PhaserPage {
 
-  count: number  = 0;
+
+
+
+
+//page constructor and game creation
+export class PhaserPage {
 
   constructor(
     public nav: NavController) {
@@ -20,119 +31,124 @@ export class PhaserPage {
   }
 
   ionViewDidEnter() {
-    console.log("ionViewDidEnter this.game : ",this.game);
-    console.log("Create phaser game object...  " + this.count)
     console.log("device pixel ratio... " + window.devicePixelRatio)
+    console.log("screen sizes",window.innerWidth,window.innerHeight);
+    //calculate the good size of the canvas
+    let FH = 0;
+    let FW = 0;
+    let ratio = 320/568;
+    //scale the gme world with ratio
+    if(window.innerWidth >= window.innerHeight){
+    FH = window.innerHeight;
+    FW = ratio*FH;
+    }
+    if(window.innerHeight>window.innerWidth){
+    FW = window.innerWidth;
+    FH = FW/ratio;
+    }
+    if(FW>window.innerWidth){
+      FW = window.innerWidth;
+      FH = FW/ratio;
+    }
+    if(FH>window.innerHeight){
+      FH = window.innerHeight;
+      FW = ratio*FH;
+    }
+   // console.log("result",FW,FH)
 
-    // create the game
-      if ( !this.game ){
 
+    //destroy old game instance if exit
+  if(GameReference){
+    GameReference.destroy();
+  }
+     // create the new game instance
       this.game = new Phaser.Game(
-        window.innerWidth * window.devicePixelRatio, window.innerHeight * window.devicePixelRatio, 
+       FW, FH, 
         Phaser.AUTO, 
         'phaserDiv', 
         { create: this.create, update: this.update, preload: this.preload }
         );
 
-      this.count++;
-      this.PlayBackgroundMusic();
+      //add cordova litener for active/inactive state
       document.addEventListener('pause', ()=>this.Paused(), false);
+      document.addEventListener("resume", ()=>this.onResume(), false);
 
+  }ionViewWillLeave() {
 
+    console.log("leaving page");
 
-    }
-  }ionViewDidLeave() {
-  //detroy all game data
-   this.game.state.clearCurrentState();
-   this.game.disableStep();
-   this.game.destroy();
-   this.game = null;
-   this.my_media.stop();
-  }PlayBackgroundMusic(){
-// get good location
-console.log("start music",this.my_media);
-let path = window.location.pathname;
-path = path.substr(0, path.length - 10 );
-// get the file
-this.my_media = new MediaPlugin(path+'audios/mario.mp3');
-this.my_media.play();
+     if(runningMedia){
+      //stop any running music
+  if(!this.game.device.desktop){
+         my_media.stop();
+  }else{
+        this.game.sound.removeByKey("mario");
+  }
+   runningMedia=false;     
+       
+  }
+
   }Paused(){
     //fire this function when app is inactive
-    this.my_media.stop();
+    if(runningMedia){ my_media.pause();}
+  }onResume(){
+    //fire this function when app is active
+      if(runningMedia){ my_media.play();}
   }
   game: Phaser.Game;
-  Path:string="Iphone";
   Test: any;
   BG:Phaser.Sprite;
+  TSO:TestSound;//test sound class
+
+  // states
   MenuState:any;
-  TSS:any;
-  POS:any;
-  TSLS:any;
-  my_media:MediaPlugin;
+  TSS:any;//test sprite state
+  POS:any;//PopUp state
+  TSLS:any;//test sprite layer state
+  TSOS:any;//test sounds state
+  PZS:any;//test pann/zoom state
+
   preload() {
-    //check Iphone or Ipad
-    if(window.innerHeight/window.innerWidth>1.6){this.Path="Iphone";}
-    else {this.Path="Ipad";}
-    //menu Assets
-      this.game.load.image("B01", 'img/'+this.Path+'/B01.png');
-      this.game.load.image("B02", 'img/'+this.Path+'/B02.png');
-      this.game.load.image("B03", 'img/'+this.Path+'/B03.png');//play sound fx
-      this.game.load.image("B04", 'img/'+this.Path+'/B04.png');//play sound fx
-      this.game.load.image('BG', 'img/'+this.Path+'/Background.png');
-      this.game.load.image("backBt", 'img/'+this.Path+'/back.png');
-      //test PoUp Assets
-      this.game.load.image("Cancel", 'img/'+this.Path+'/cancel.png');
-      this.game.load.image("Pop", 'img/'+this.Path+'/pop.png');
-      this.game.load.image("Yes", 'img/'+this.Path+'/yes.png');
-      this.game.load.image("No", 'img/'+this.Path+'/no.png');
-      this.game.load.image("Bt4", 'img/'+this.Path+'/bt4.png');
-      //test sprite Assets
-      this.game.load.image("Bt1", 'img/'+this.Path+'/bt1.png');
-      this.game.load.image("Room", 'img/'+this.Path+'/Room1.png');
-      this.game.load.image("Bt2", 'img/'+this.Path+'/bt2.png');
-      this.game.load.image("Bt3", 'img/'+this.Path+'/bt3.png');//play sound fx
-      this.game.load.atlas('spritesheet', 'img/'+this.Path+'/cake.png', 'img/'+this.Path+'/cake.json');
-      //test sprite Layering Assets
-       this.game.load.image("Mountain", 'img/'+this.Path+'/Mountain.png');
-       this.game.load.image("Sky", 'img/'+this.Path+'/Sky.png');
-       this.game.load.atlas('bird', 'img/'+this.Path+'/bird.png', 'img/'+this.Path+'/bird.json');
+   //plce the game in the center of the sreen
+   this.game.scale.pageAlignHorizontally = true;
+   this.game.scale.pageAlignVertically = true;
+   this.game.scale.refresh();
   }
-
   create() {
-    //reseize world
-    this.game.world.setBounds(0,0,window.innerWidth,window.innerHeight);
-    // console.log("------- window.devicePixelRatio ------->",window.devicePixelRatio);
-    // console.log("new game.world ",this.game.world.bounds);
-
+      //enable rendring FPS
+      this.game.time.advancedTiming =true;
      // add games states
       let M = new Menu(this.game);
       this.MenuState = M.State;
-
       let TS = new TestSprite(this.game);
       this.TSS = TS.State;
-
       let PO = new PopUp(this.game);
       this.POS = PO.State;
-
-
       let TSL = new TestSpritelayering(this.game);
       this.TSLS = TSL.State;
+ 
+      this.TSO = new TestSound(this.game);
+      this.TSOS = this.TSO.State;
 
+
+     
 
       this.game.state.add("Menu",this.MenuState);
       this.game.state.add("TestSprite",this.TSS);
       this.game.state.add("TestPop",this.POS);
       this.game.state.add("TestSpriteLayering",this.TSLS);
-
+      this.game.state.add("TestSound",this.TSOS);
+     
+      
+      GameReference = this.game;
       //start the Menu
       this.game.state.start("Menu");
-      
-
-console.log(this.game.state.getCurrentState());
-
-  }update(){
-  }
+  }update(){}
 }
+
+
+
+
 
 
 // menu Class
@@ -142,19 +158,37 @@ class Menu {
   BT1:Phaser.Button;
   BT2:Phaser.Button;
   BT3:Phaser.Button;
-
+  BT4:Phaser.Button;
   BG:Phaser.Sprite;
   Title:Phaser.Text;
-
  textValue:Phaser.Text;
  rendertext:Phaser.Text;
-  
+
   constructor(game:Phaser.Game){
     this.game = game;
     //create state 
     this.State = new Phaser.State();
-
+    this.State.preload = () =>{
+ 
+      this.game.load.image("B01", 'img/B01.png');
+      this.game.load.image("B02", 'img/B02.png');
+      this.game.load.image("B03", 'img/B03.png');//test sound
+      this.game.load.image("B04", 'img/B04.png');
+      this.game.load.image('BG', 'img/Background.jpg');
+      this.game.load.image("backBt", 'img/back.png');
+    }
     this.State.create = () =>{  
+
+      if(runningMedia){
+      //stop any running music
+  if(!this.game.device.desktop){
+         my_media.stop();
+  }else{
+        this.game.sound.removeByKey("mario");
+  }
+   runningMedia=false;       
+  }
+
       //add image background ( fit the screen)
       this.BG = this.game.add.sprite(0,0,'BG');
       this.BG.width = this.game.world.bounds.width;
@@ -163,6 +197,7 @@ class Menu {
       let style = { font: String(15*window.devicePixelRatio)+"px Arial", fill: "#ffffff",  boundsAlignH: "center", boundsAlignV: "middle" };
       this.Title = this.game.add.text(0, 0, "The Menu", style);
       this.Title.setTextBounds(0, 0, this.game.world.bounds.width, 180);
+
       //add controls buttons
       //test sprite animation and movment
       this.BT1 = this.game.add.button(this.game.world.centerX,this.game.world.height*0.25,'B01',this.ButtonAction,this);
@@ -174,31 +209,39 @@ class Menu {
       //test sprite layering
       this.BT3 = this.game.add.button(this.game.world.centerX,this.game.world.height*0.5,'B04',this.ButtonAction,this);
       this.BT3.anchor.set(0.5,0.5);
-      //enable rendring FPS
-      this.game.time.advancedTiming =true;
-      
+
+      //test sprite layering
+      this.BT4 = this.game.add.button(this.game.world.centerX,this.game.world.height*0.625,'B03',this.ButtonAction,this);
+      this.BT4.anchor.set(0.5,0.5);
+     
+   
   }
   this.State.update = () =>{}
   this.State.render = () =>{
-    this.game.debug.text( "Elapsed seconds :"+Math.round(this.game.time.totalElapsedSeconds()).toString(), 10, 100 );
-    this.game.debug.text("FPS :"+ this.game.time.fps ,10,120);
+  this.game.debug.text( "Elapsed seconds :"+Math.round(this.game.time.totalElapsedSeconds()).toString(), 10, 100 );
+   this.game.debug.text("FPS :"+ this.game.time.fps ,10,120);
 }
   
   
 }
   ButtonAction(bt){
 if(bt==this.BT1){
+//this.game.state.start("TestSprite");
 this.game.state.start("TestSprite", Phaser.Plugin.StateTransition.Out.SlideLeft, Phaser.Plugin.StateTransition.In.SlideLeft);
 }else if(bt==this.BT2){
-this.game.state.start("TestPop", Phaser.Plugin.StateTransition.Out.SlideLeft, Phaser.Plugin.StateTransition.In.SlideLeft);
+  this.game.state.start("TestPop", Phaser.Plugin.StateTransition.Out.SlideLeft, Phaser.Plugin.StateTransition.In.SlideLeft);
+//this.game.state.start("TestPop");
 }else if(bt==this.BT3){
-this.game.state.start("TestSpriteLayering", Phaser.Plugin.StateTransition.Out.SlideLeft, Phaser.Plugin.StateTransition.In.SlideLeft);
+  this.game.state.start("TestSpriteLayering", Phaser.Plugin.StateTransition.Out.SlideLeft, Phaser.Plugin.StateTransition.In.SlideLeft);
+//this.game.state.start("TestSpriteLayering");
+}else if(bt==this.BT4){
+  this.game.state.start("TestSound", Phaser.Plugin.StateTransition.Out.SlideLeft, Phaser.Plugin.StateTransition.In.SlideLeft);
+//this.game.state.start("TestSound");
 }
 
   }
-
-
 }
+
 
 
 
@@ -217,7 +260,12 @@ class TestSprite {
     this.game = game;
     //create state 
     this.State = new Phaser.State();
-
+ this.State.preload = () =>{
+     this.game.load.image("Bt1", 'img/bt1.png');
+      this.game.load.image("Room", 'img/Room1.jpg');
+      this.game.load.image("Bt2", 'img/bt2.png');
+      this.game.load.atlas('spritesheet', 'img/cake.png', 'img/cake.json');
+ }
     this.State.create = () =>{  
       //add image background ( fit the screen)
       this.BG = this.game.add.sprite(0,0,'Room');
@@ -242,7 +290,6 @@ class TestSprite {
     this.SP.animations.play('anim',3,true);
     // sprite will move 
     this.Stopping = false;
-    this.game.time.advancedTiming =true;
 
   };
   this.State.update = () =>{if(!this.Stopping){this.Move();}  }
@@ -270,11 +317,11 @@ class TestSprite {
     this.Stopping = !this.Stopping;
   }BackToMenu(){
     this.game.state.start("Menu", Phaser.Plugin.StateTransition.Out.SlideRight, Phaser.Plugin.StateTransition.In.SlideRight);
+   
+    
   }
   
 }
-
-
 
 
 
@@ -296,7 +343,13 @@ class PopUp {
     this.game = game;
     //create state 
     this.State = new Phaser.State();
-
+    this.State.preload = () =>{
+      this.game.load.image("Cancel", 'img/cancel.png');
+      this.game.load.image("Pop", 'img/pop.png');
+      this.game.load.image("Yes", 'img/yes.png');
+      this.game.load.image("No", 'img/no.png');
+      this.game.load.image("Bt4", 'img/bt4.png');
+ }
     this.State.create = () =>{  
       //add image background ( fit the screen)
       this.BG = this.game.add.sprite(0,0,'BG');
@@ -308,27 +361,24 @@ class PopUp {
       this.BT1 = this.game.add.button(10,this.game.world.height-10,'Bt4',this.ShowPop,this);
       this.BT1.anchor.set(0,1);
 
-      
-
       //addgroup Container
     this.PopContainer = this.game.add.group();
-      
+
       //add a sprite background
     this.PopBackground = this.game.add.sprite(this.game.world.centerX,this.game.world.centerY,'Pop');
     this.PopBackground.anchor.set(0.5,0.5);
-    this.PopBackground.scale.set(0.5,0.5);
+
     //add colose button to the pop
     this.CloseBt= this.game.add.button(this.PopBackground.x+this.PopBackground.width*0.5,this.PopBackground.y-this.PopBackground.height*0.5,'Cancel',this.ClosePop,this);
     this.CloseBt.anchor.set(0.5,0.5);
-    this.CloseBt.scale.set(0.5,0.5);
+
     //add 2 buttons yes and no
     this.YesBt= this.game.add.button(this.PopBackground.x,this.PopBackground.y-48,'Yes',this.ClosePop,this);
     this.YesBt.anchor.set(0.5,0.5);
-    this.YesBt.scale.set(0.5,0.5);
 
     this.NoBt= this.game.add.button(this.PopBackground.x,this.PopBackground.y+48,'No',this.ClosePop,this);
     this.NoBt.anchor.set(0.5,0.5);
-    this.NoBt.scale.set(0.5,0.5);
+
 //add all element to the popUp
 this.PopContainer.add(this.PopBackground);
 this.PopContainer.add(this.CloseBt);
@@ -341,8 +391,6 @@ this.PopContainer.visible = false;
 // back to menu button
       this.backBt= this.game.add.button(this.game.world.width-10,55,'backBt',this.BackToMenu,this);
       this.backBt.anchor.set(1,0);
-
- this.game.time.advancedTiming =true;
   };
   this.State.update = () =>{ }
   this.State.render = () =>{
@@ -356,27 +404,33 @@ this.PopContainer.visible = false;
   ClosePop(){
    this.PopContainer.visible = false;
   }BackToMenu(){
-    this.game.state.start("Menu", Phaser.Plugin.StateTransition.Out.SlideRight, Phaser.Plugin.StateTransition.In.SlideRight);
+   this.game.state.start("Menu", Phaser.Plugin.StateTransition.Out.SlideRight, Phaser.Plugin.StateTransition.In.SlideRight);
   }
   
 }
 
+
+
+
 // sprite layering, background/foreground// TestSprite Class
 class TestSpritelayering {
   game:Phaser.Game;
-
   State:Phaser.State;
-
   background:Phaser.Sprite;
   foreground:Phaser.Sprite;
   SP:Phaser.Sprite;
-
   backBt:Phaser.Button;
 
   constructor(game:Phaser.Game){
     this.game = game;
     //create state 
     this.State = new Phaser.State();
+
+this.State.preload = () =>{ 
+ this.game.load.image("Mountain", 'img/Mountain.jpg');
+       this.game.load.image("Sky", 'img/Sky.png');
+       this.game.load.atlas('bird', 'img/bird.png', 'img/bird.json');
+}
 
     this.State.create = () =>{  
 
@@ -385,13 +439,11 @@ class TestSpritelayering {
       this.background.width = this.game.world.bounds.width;
       this.background.height =this.game.world.bounds.height;
 
-
       //add spritevanimation
      this.SP = this.game.add.sprite(this.game.world.bounds.width,this.game.world.height*0.63,'bird');
      this.SP.anchor.set(0.5,0.5);
      this.SP.animations.add('anim');
      this.SP.animations.play('anim',12,true);
-
 
       //add image foreground ( fit the screen)
       this.foreground = this.game.add.sprite(0,0,'Sky');
@@ -401,12 +453,6 @@ class TestSpritelayering {
       // back to menu button
       this.backBt= this.game.add.button(this.game.world.width-10,55,'backBt',this.BackToMenu,this);
       this.backBt.anchor.set(1,0);
-      
-
-       this.game.time.advancedTiming =true;
-    
-   
-
   };
   this.State.update = () =>{ 
     this.SP.x -= 5;
@@ -419,7 +465,143 @@ class TestSpritelayering {
 }
 }
   BackToMenu(){
-    this.game.state.start("Menu", Phaser.Plugin.StateTransition.Out.SlideRight, Phaser.Plugin.StateTransition.In.SlideRight);
+  this.game.state.start("Menu", Phaser.Plugin.StateTransition.Out.SlideRight, Phaser.Plugin.StateTransition.In.SlideRight);
   }
   
 }
+
+
+
+
+
+// Test Sound Class using both cordova media and Phaser sound
+class TestSound {
+  game:Phaser.Game;
+  State:Phaser.State;
+  background:Phaser.Sprite;
+  backBt:Phaser.Button;
+  BT1:Phaser.Button;
+  BT2:Phaser.Button;
+  Title:Phaser.Text;
+  Sfx:Phaser.Sound;
+  music:Phaser.Sound;
+  constructor(game:Phaser.Game){
+    this.game = game;
+
+    //create state 
+    this.State = new Phaser.State();
+
+   this.State.preload = () =>{ 
+       this.game.load.image("bt3", 'img/bt3.png');
+       this.game.load.image("bt5", 'img/bt5.png');
+       
+        if(this.game.device.desktop){
+          this.game.load.audio('mario','audios/mario.mp3');
+          this.game.load.audio('coin','audios/coin.mp3');
+        }
+}
+
+    this.State.create = () =>{  
+
+      //add image background ( fit the screen)
+      this.background = this.game.add.sprite(0,0,'BG');
+      this.background.width = this.game.world.bounds.width;
+      this.background.height =this.game.world.bounds.height;
+
+      let style = { font: String(15*window.devicePixelRatio)+"px Arial", fill: "#ffffff",  boundsAlignH: "center", boundsAlignV: "middle" };
+      this.Title = this.game.add.text(0, 0, "The audio", style);
+      this.Title.setTextBounds(0, 0, this.game.world.bounds.width, 180);
+
+      // button play single sound
+      this.BT1= this.game.add.button(this.game.world.centerX,this.game.world.centerY-50,'bt3',this.PlayFX,this);
+      this.BT1.anchor.set(0.5,0.5);
+      // button play background music
+      this.BT2= this.game.add.button(this.game.world.centerX,this.game.world.centerY+50,'bt5',this.ToggleMusic,this);
+      this.BT2.anchor.set(0.5,0.5);
+    
+       if(this.game.device.desktop){
+         this.music = this.game.add.audio('mario');
+         this.Sfx = this.game.add.audio('coin');
+      }
+
+      // back to menu button
+      this.backBt= this.game.add.button(this.game.world.width-10,55,'backBt',this.BackToMenu,this);
+      this.backBt.anchor.set(1,0);
+  };
+  this.State.update = () =>{}
+    this.State.render = () =>{
+    this.game.debug.text( "Elapsed seconds :"+Math.round(this.game.time.totalElapsedSeconds()).toString(), 10, 100 );
+    this.game.debug.text("FPS :"+ this.game.time.fps ,10,120);
+};
+}
+  BackToMenu(){
+  this.game.state.start("Menu", Phaser.Plugin.StateTransition.Out.SlideRight, Phaser.Plugin.StateTransition.In.SlideRight);
+  }PlayFX(){
+
+if(!this.game.device.desktop){
+ if(!soundFx){
+        let path = window.location.pathname;
+        path = path.substr(0, path.length - 10 );
+        // get the file
+         soundFx = new MediaPlugin(path+'audios/coin.mp3');
+ }
+ soundFx.play();
+}else{ this.Sfx.play("",0,1,false);}
+
+  }ToggleMusic(){
+
+    if(!this.game.device.desktop){
+
+       if(!my_media){
+         // get good location
+        let path = window.location.pathname;
+        path = path.substr(0, path.length - 10 );
+        // get the file
+          my_media = new MediaPlugin(path+'audios/mario.mp3');
+          }
+
+    if(runningMedia == false){
+    //RepeatedSound(true);
+    my_media.play();
+    runningMedia = true;
+
+    }else{
+
+     my_media.pause();
+     runningMedia = false;
+
+    }
+
+    }else{
+
+      console.log("runningMedia ",runningMedia);
+      if(runningMedia == false){
+
+    if(this.music.paused){
+
+      this.music.resume();
+      
+      }else{
+
+         this.music.play("",0,1,true);
+
+        }
+
+        runningMedia = true;
+
+      }else{
+      this.music.pause();
+      runningMedia = false;
+
+    }
+
+
+    }
+  }
+  
+}
+
+
+
+
+
