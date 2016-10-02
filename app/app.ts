@@ -6,6 +6,8 @@ import { Page1 } from './pages/page1/page1';
 import { Page2 } from './pages/page2/page2';
 import {PhaserPage} from './pages/phaser-page/phaser-page';
 
+var CurrentPageTitle:string;
+
 @Component({
   templateUrl: 'build/app.html'
 })
@@ -39,6 +41,11 @@ class MyApp {
   openPage(page) {
     // Reset the content nav to have just this page
     // we wouldn't want the back button to show in this scenario
+    // dont kill phaser if user click menu , but only when leave the page
+    if(CurrentPageTitle == 'Phaser' && page.title == 'Phaser'){return;}
+    CurrentPageTitle = page.title;
+
+
     this.nav.setRoot(page.component);
   }
 }
