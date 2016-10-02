@@ -1,14 +1,15 @@
 // Library Imports
 import {Component, ViewChild} from '@angular/core';
 import {NavController, Alert} from 'ionic-angular';
-import { MediaPlugin } from 'ionic-native';
+
+
 
 
 var GameReference:any;//detroy when you quit the page
 
 //create only one instance
-var soundFx:MediaPlugin;
-var my_media:MediaPlugin;
+var soundFx:Media;
+var my_media:Media;
 //flag to check if background music is active
 var runningMedia:boolean=false;
 declare var Phaser: any;
@@ -80,7 +81,7 @@ export class PhaserPage {
      if(runningMedia){
       //stop any running music
   if(!this.game.device.desktop){
-         my_media.stop();
+        my_media.stop();
   }else{
         this.game.sound.removeByKey("mario");
   }
@@ -182,7 +183,7 @@ class Menu {
       if(runningMedia){
       //stop any running music
   if(!this.game.device.desktop){
-         my_media.stop();
+        my_media.stop();
   }else{
         this.game.sound.removeByKey("mario");
   }
@@ -539,17 +540,26 @@ class TestSound {
   }PlayFX(){
 
 if(!this.game.device.desktop){
+
  if(!soundFx){
         let path = window.location.pathname;
         path = path.substr(0, path.length - 10 );
         // get the file
-         soundFx = new MediaPlugin(path+'audios/coin.mp3');
+         soundFx = new Media(path+'audios/coin.mp3',
+        function () {
+            console.log("playAudio():Audio Success");
+        },
+        // error callback
+        function (err) {
+            console.log("playAudio():Audio Error: " + err);
+        });
  }
  soundFx.play();
+ 
 }else{ this.Sfx.play("",0,1,false);}
 
   }ToggleMusic(){
-
+    this.Title.text = "start BG music";
     if(!this.game.device.desktop){
 
        if(!my_media){
@@ -557,12 +567,21 @@ if(!this.game.device.desktop){
         let path = window.location.pathname;
         path = path.substr(0, path.length - 10 );
         // get the file
-          my_media = new MediaPlugin(path+'audios/mario.mp3');
+          my_media = new Media(path+'audios/mario.mp3',
+        // success callback
+        function () {
+            console.log("playAudio():Audio Success");
+        },
+        // error callback
+        function (err) {
+            console.log("playAudio():Audio Error: " + err);
+        }
+        );
           }
 
     if(runningMedia == false){
-    //RepeatedSound(true);
-    my_media.play();
+   
+    my_media.play({ numberOfLoops: 100 });
     runningMedia = true;
 
     }else{
