@@ -6,7 +6,7 @@ import { Page1 } from './pages/page1/page1';
 import { Page2 } from './pages/page2/page2';
 import {PhaserPage} from './pages/phaser-page/phaser-page';
 
-var CurrentPageTitle:string;
+var CurrentPageTitle: string;
 
 @Component({
   templateUrl: 'build/app.html'
@@ -16,7 +16,7 @@ class MyApp {
 
   rootPage: any = Page1;
 
-  pages: Array<{title: string, component: any}>;
+  pages: Array<{ title: string, component: any }>;
 
   constructor(public platform: Platform) {
     this.initializeApp();
@@ -35,6 +35,16 @@ class MyApp {
       // Okay, so the platform is ready and our plugins are available.
       // Here you can do any higher level native things you might need.
       StatusBar.styleDefault();
+
+
+      // Debug so we know if we are using the accelerated view or not 
+      if (window.indexedDB) {
+        console.log('I\'m in WKWebView!');
+      } else {
+        console.log('I\'m in UIWebView');
+      }
+
+
     });
   }
 
@@ -42,7 +52,7 @@ class MyApp {
     // Reset the content nav to have just this page
     // we wouldn't want the back button to show in this scenario
     // dont kill phaser if user click menu , but only when leave the page
-    if(CurrentPageTitle == 'Phaser' && page.title == 'Phaser'){return;}
+    if (CurrentPageTitle === 'Phaser' && page.title === 'Phaser') { return; }
     CurrentPageTitle = page.title;
 
 
